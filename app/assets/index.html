@@ -7,41 +7,36 @@
 
 	</style>
 	<link rel="stylesheet" type="text/css" href="app.css">
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="app.js"></script>
 	<script>require('initialize');</script>
 
 </head>
 <body>
-	<p id="demo" onclick="search()">Click me to change my text color.</p>
+	<form onsubmit="search()">
+		Stock Ticker<br>
+		<input type = "text" id="queryText" value = "Enter here"><br>
+	</form>
+	<button id="searchButton" onclick="search()">Search!</button>
+	<p id=""></p>
 </body>
 
 <script>
-	//call back functions
-	var error = function (err, response, body) {
-		console.log('ERROR', err);
-	};
-
-	var success = function (data) {
-		data = JSON.parse(data);
-		for(var x in data.statuses)
-			console.log(data.statuses[x].text);
-	};
-
-	var Twitter = require('twitter-node-client').Twitter;
-
-	var config = {
-		"consumerKey": "hbOU1pfUSWt3jXKJUu5Y5pMMT",
-		"consumerSecret": "eOO1LCmJdEuSMySlP2mewrhwX6xUvHgLNfH8tcwIy8EVDNEof5",
-		"accessToken": "714958449323454468-VOEhP0EQrFDS9hC1STBeMPrb3cALSDQ",
-		"accessTokenSecret": "urZnQ5jTcPMTWxPZ9IzWVqPIxM8OglvKrRc67TUFcFkec",
-		"callBackUrl": ""
-	};
-
-	var twitter = new Twitter(config);
-
 	function search()
 	{
-		twitter.getSearch({'q':'$JNUG'}, error, success);
+		var query_term = document.getElementById("queryText").value;
+		console.log(query_term);
+
+		$.getJSON("http://localhost:3000/get?query=" + query_term, function(data) {
+			var items = [];
+			for(var x in data.statuses)
+				items.push("<li id='" + x + "'>" + data.statuses[x].text + "</li>");
+
+			$( "<ul>", {
+				"class" : "tweet-lst",
+				html: items.join( "" )
+			}).appendTo("body");
+		});
 	}
 </script>
 </html>

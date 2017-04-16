@@ -1,13 +1,3 @@
-//call back functions
-var error = function (err, response, body) {
-	console.log('ERROR', err);
-};
-	var success = function (data) {
-	data = JSON.parse(data);
-	for(var x in data.statuses)
-		console.log(data.statuses[x].text);
-};
-
 var Twitter = require('twitter-node-client').Twitter;
 
 var config = {
@@ -20,7 +10,31 @@ var config = {
 
 var twitter = new Twitter(config);
 
-function search()
-{
-	twitter.getSearch({'q':'$JNUG'}, error, success);
+const http = require('http');
+const url = require('url');
+const port = 3000;
+
+const requestHandler = (request, response) => {
+	var params = url.parse(request.url,true).query;
+	console.log(params);
+	var query = params.query;
+
+	console.log(request.url.substring(0,request.url.indexOf("?")));
+
+	if(request.url.substring(0,request.url.indexOf("?")) == '/get') {
+		twitter.getSearch({'q': '$' + query + '-? -RT', 'lang' : 'en', 'result_type' : 'recent'},
+			(err) => {/*pass*/},
+			(data) => response.end(data)
+		);
+		return;
+	}
+	response.end(request.url);
 }
+
+const server = http.createServer(requestHandler);
+server.listen(port, (err) => {
+	if(err) {
+		return console.log('something bad happened', err);
+	}
+	console.log(`server is listening on ${port}`);
+})
